@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการอะไหล่ - Spare Parts Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .nav-tabs {
+            background: white;
+            display: flex;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        
+        .nav-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .nav-tab:hover {
+            background: #f7fafc;
+        }
+        
+        .nav-tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #667eea;
+        }
+        
+        .card.success { border-left-color: #48bb78; }
+        .card.warning { border-left-color: #ed8936; }
+        .card.danger { border-left-color: #f56565; }
+        
+        .card-title {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+        
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #dd6b20;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        select, input[type="text"], input[type="number"], input[type="date"], textarea {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .form-section {
+            display: none;
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-pending {
+            background: #fef5e7;
+            color: #ed8936;
+        }
+        
+        .badge-approved {
+            background: #e6f7ed;
+            color: #48bb78;
+        }
+        
+        .badge-rejected {
+            background: #fee;
+            color: #f56565;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔧 ระบบจัดการอะไหล่</h1>
+        <p>Spare Parts Management System</p>
+    </header>
+    
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+        <div class="nav-tab" onclick="switchTab('inventory')">📦 Inventory</div>
+        <div class="nav-tab" onclick="switchTab('movements')">🔄 Movements</div>
+        <div class="nav-tab" onclick="switchTab('requests')">📋 Requests</div>
+        <div class="nav-tab" onclick="switchTab('sites')">🏢 Sites</div>
+        <div class="nav-tab" onclick="switchTab('parts')">🔧 Parts</div>
+    </div>
+    
+    <div class="container">
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-title">ศูนย์บริการทั้งหมด</div>
+                    <div class="card-value" id="totalSites">0</div>
+                </div>
+                <div class="card success">
+                    <div class="card-title">รายการอะไหล่</div>
+                    <div class="card-value" id="totalParts">0</div>
+                </div>
+                <div class="card warning">
+                    <div class="card-title">สต็อกต่ำ</div>
+                    <div class="card-value" id="lowStock">0</div>
+                </div>
+                <div class="card danger">
+                    <div class="card-title">คำขอรออนุมัติ</div>
+                    <div class="card-value" id="pendingRequests">0</div>
+                </div>
+            </div>
+            
+            <h3>สต็อกต่ำ</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ศูนย์</th>
+                        <th>รหัสอะไหล่</th>
+                        <th>ชื่ออะไหล่</th>
+                        <th>สต็อกปัจจุบัน</th>
+                        <th>สต็อกขั้นต่ำ</th>
+                    </tr>
+                </thead>
+                <tbody id="lowStockTable"></tbody>
+            </table>
+            
+            <h3 style="margin-top: 30px;">คำขอรออนุมัติ</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ศูนย์</th>
+                        <th>อะไหล่</th>
+                        <th>จำนวน</th>
+                        <th>ผู้ขอ</th>
+                        <th>วันที่</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingRequestsTable"></tbody>
+            </table>
+        </div>
+        
+        <!-- Inventory Tab -->
+        <div id="inventory-tab" class="tab-content">
+            <div class="toolbar">
+                <select id="inventorySiteFilter" onchange="loadInventory()">
+                    <option value="">ทุกศูนย์</option>
+                </select>
+                <button class="btn btn-success" onclick="toggleInventoryForm()">+ ปรับปรุงสต็อก</button>
+                <button class="btn btn-primary" onclick="exportInventory()">📥 Export</button>
+            </div>
+            
+            <div id="inventoryForm" class="form-section">
+                <h3>ปรับปรุงสต็อก</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>อะไหล่ *</label>
+                        <select id="invPart" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>ศูนย์ *</label>
+                        <select id="invSite" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>จำนวน *</label>
+                        <input type="number" id="invQuantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ผู้ทำรายการ *</label>
+                        <input type="text" id="invCreatedBy" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>หมายเหตุ</label>
+                    <textarea id="invRemark" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-danger" onclick="toggleInventoryForm()">ยกเลิก</button>
+                    <button class="btn btn-success" onclick="submitInventoryAdjust()">บันทึก</button>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>ศูนย์</th>
+                        <th>รหัสอะไหล่</th>
+                        <th>ชื่ออะไหล่</th>
+                        <th>Location (Rack)</th>
+                        <th>IOS Version</th>
+                        <th>จำนวน</th>
+                        <th>สต็อกขั้นต่ำ</th>
+                        <th>อัพเดทล่าสุด</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTable"></tbody>
+            </table>
+        </div>
+        
+        <!-- Movements Tab -->
+        <div id="movements-tab" class="tab-content">
+            <div class="toolbar">
+                <select id="movementSiteFilter" onchange="loadMovements()">
+                    <option value="">ทุกศูนย์</option>
+                </select>
+                <select id="movementTypeFilter" onchange="loadMovements()">
+                    <option value="">ทุกประเภท</option>
+                    <option value="purchase">ซื้อเข้า</option>
+                    <option value="transfer">โอนย้าย</option>
+                    <option value="issue">เบิกใช้</option>
+                    <option value="return">คืนสต็อก</option>
+                    <option value="adjust">ปรับปรุง</option>
+                </select>
+                <button class="btn btn-primary" onclick="exportMovements()">📥 Export</button>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>วันที่</th>
+                        <th>อะไหล่</th>
+                        <th>จาก</th>
+                        <th>ถึง</th>
+                        <th>จำนวน</th>
+                        <th>ประเภท</th>
+                        <th>เลขที่อ้างอิง</th>
+                        <th>ผู้ทำรายการ</th>
+                    </tr>
+                </thead>
+                <tbody id="movementsTable"></tbody>
+            </table>
+        </div>
+        
+        <!-- Requests Tab -->
+        <div id="requests-tab" class="tab-content">
+            <div class="toolbar">
+                <select id="requestStatusFilter" onchange="loadRequests()">
+                    <option value="">ทุกสถานะ</option>
+                    <option value="pending">รออนุมัติ</option>
+                    <option value="approved">อนุมัติแล้ว</option>
+                    <option value="rejected">ปฏิเสธ</option>
+                </select>
+                <button class="btn btn-success" onclick="toggleRequestForm()">+ สร้างคำขอใหม่</button>
+            </div>
+            
+            <div id="requestForm" class="form-section">
+                <h3>สร้างคำขอเบิกอะไหล่</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>ศูนย์ *</label>
+                        <select id="reqSite" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>อะไหล่ *</label>
+                        <select id="reqPart" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>จำนวน *</label>
+                        <input type="number" id="reqQuantity" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>ผู้ขอ *</label>
+                        <input type="text" id="reqRequestedBy" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>หมายเหตุ</label>
+                    <textarea id="reqRemark" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-danger" onclick="toggleRequestForm()">ยกเลิก</button>
+                    <button class="btn btn-success" onclick="submitRequest()">บันทึก</button>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>ศูนย์</th>
+                        <th>อะไหล่</th>
+                        <th>จำนวน</th>
+                        <th>ผู้ขอ</th>
+                        <th>วันที่</th>
+                        <th>สถานะ</th>
+                        <th>ผู้อนุมัติ</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTable"></tbody>
+            </table>
+        </div>
+        
+        <!-- Sites Tab -->
+        <div id="sites-tab" class="tab-content">
+            <div class="toolbar">
+                <button class="btn btn-success" onclick="toggleSiteForm()">+ เพิ่มศูนย์ใหม่</button>
+            </div>
+            
+            <div id="siteForm" class="form-section">
+                <h3>เพิ่มศูนย์บริการ</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>รหัสศูนย์ *</label>
+                        <input type="text" id="siteCode" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ชื่อศูนย์ *</label>
+                        <input type="text" id="siteName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>จังหวัด</label>
+                        <input type="text" id="siteProvince">
+                    </div>
+                    <div class="form-group">
+                        <label>ผู้ติดต่อ</label>
+                        <input type="text" id="siteContact">
+                    </div>
+                    <div class="form-group">
+                        <label>เบอร์โทร</label>
+                        <input type="text" id="sitePhone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ที่อยู่</label>
+                    <textarea id="siteAddress" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-danger" onclick="toggleSiteForm()">ยกเลิก</button>
+                    <button class="btn btn-success" onclick="submitSite()">บันทึก</button>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสศูนย์</th>
+                        <th>ชื่อศูนย์</th>
+                        <th>จังหวัด</th>
+                        <th>ผู้ติดต่อ</th>
+                        <th>เบอร์โทร</th>
+                    </tr>
+                </thead>
+                <tbody id="sitesTable"></tbody>
+            </table>
+        </div>
+        
+        <!-- Parts Tab -->
+        <div id="parts-tab" class="tab-content">
+            <div class="toolbar">
+                <button class="btn btn-success" onclick="togglePartForm()">+ เพิ่มอะไหล่ใหม่</button>
+            </div>
+            
+            <div id="partForm" class="form-section">
+                <h3>เพิ่มอะไหล่</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Part Number *</label>
+                        <input type="text" id="partNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ชื่ออะไหล่ *</label>
+                        <input type="text" id="partName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>หมวดหมู่</label>
+                        <input type="text" id="partCategory">
+                    </div>
+                    <div class="form-group">
+                        <label>แบรนด์</label>
+                        <input type="text" id="partBrand">
+                    </div>
+                    <div class="form-group">
+                        <label>รุ่น</label>
+                        <input type="text" id="partModel">
+                    </div>
+                    <div class="form-group">
+                        <label>Location (Rack Number)</label>
+                        <input type="text" id="partLocation">
+                    </div>
+                    <div class="form-group">
+                        <label>IOS Version</label>
+                        <input type="text" id="partIosVersion">
+                    </div>
+                    <div class="form-group">
+                        <label>หน่วย</label>
+                        <input type="text" id="partUnit" value="pcs">
+                    </div>
+                    <div class="form-group">
+                        <label>สต็อกขั้นต่ำ</label>
+                        <input type="number" id="partMinStock" value="5" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>รายละเอียด</label>
+                    <textarea id="partDescription" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-danger" onclick="togglePartForm()">ยกเลิก</button>
+                    <button class="btn btn-success" onclick="submitPart()">บันทึก</button>
+                </div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Part Number</th>
+                        <th>ชื่ออะไหล่</th>
+                        <th>แบรนด์</th>
+                        <th>รุ่น</th>
+                        <th>Rack</th>
+                        <th>IOS Version</th>
+                        <th>หน่วย</th>
+                        <th>สต็อกขั้นต่ำ</th>
+                    </tr>
+                </thead>
+                <tbody id="partsTable"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    ">
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        ">
+            <div style="
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 15px;
+            "></div>
+            <p style="color: #2d3748; font-weight: 600;">กำลังโหลด...</p>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
